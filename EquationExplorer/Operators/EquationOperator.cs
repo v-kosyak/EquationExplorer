@@ -6,7 +6,7 @@ namespace EquationExplorer.Operators
     {
         public abstract T Evaluate(T left, T right);
 
-        public virtual bool HasPriority(EquationOperator<T> equationOperator)
+        public bool HasPriority(EquationOperator<T> equationOperator)
         {
             return DefaultPriority;
         }

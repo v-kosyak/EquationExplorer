@@ -11,22 +11,22 @@ namespace EquationExplorer
 
         public void AddAdditionOperator(EquationResolver<int> resolver)
         {
-            resolver.AddOperator<Operators.AdditionEquationOperatorInt32>();
+            resolver.AddOperator<Operators.AdditionEquationOperator<Int32>>();
         }
 
         public void AddSubstructionOperator(EquationResolver<int> resolver)
         {
-            resolver.AddOperator<Operators.SubstructionEquationOperatorInt32>();
+            resolver.AddOperator<Operators.SubtractionEquationOperator<int>>();
         }
 
         public void AddMultiplicationOperator(EquationResolver<int> resolver)
         {
-            resolver.AddOperator<Operators.MultiplyEquationOperatorInt32>();
+            resolver.AddOperator<Operators.MultiplyEquationOperator<int>>();
         }
 
         public void AddDivisionOperator(EquationResolver<int> resolver)
         {
-            resolver.AddOperator<Operators.DivisionEquationOperatorInt32>();
+            resolver.AddOperator<Operators.DivisionEquationOperator<int>>();
         }
 
         public EquationResolver<int> CreateResolver()

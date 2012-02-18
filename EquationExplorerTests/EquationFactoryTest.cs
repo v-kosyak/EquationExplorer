@@ -35,11 +35,13 @@ namespace EquationExplorerTests
         public void EquationFactoryCanCreateComplexEquation()
         {
             var opMock = new Mock<EquationOperator<int>>();
-            opMock.Setup(op => op.HasPriority(It.IsAny<EquationOperator<int>>())).Returns(false);
+            opMock.SetupAllProperties();
+            opMock.Object.DefaultPriority = false;
             var equationOperator = opMock.Object;
 
             var prioMock = new Mock<EquationOperator<int>>();
-            prioMock.Setup(op => op.HasPriority(It.IsAny<EquationOperator<int>>())).Returns(true);
+            prioMock.SetupAllProperties();
+            prioMock.Object.DefaultPriority = true;
             var prioOperator = prioMock.Object;
 
             var sut = new EquationFactory();

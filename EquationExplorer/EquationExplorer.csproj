@@ -50,6 +50,8 @@
     <Compile Include="EquationFactory.cs" />
     <Compile Include="IFactory.cs" />
     <Compile Include="Int32EquationFactory.cs" />
+    <Compile Include="Operators\AdditionEquationOperator.cs" />
+    <Compile Include="Operators\DivisionEquationOperator.cs" />
     <Compile Include="Operators\EquationOperator.cs" />
     <Compile Include="EquationResolver.cs" />
     <Compile Include="Equations\CompositeEquation.cs" />
@@ -57,14 +59,8 @@
     <Compile Include="Equations\SingleEquation.cs" />
     <Compile Include="IEquationFactory.cs" />
     <Compile Include="ISequenceGenerator.cs" />
-    <Compile Include="Operators\AdditionEquationOperatorDouble.cs" />
-    <Compile Include="Operators\AdditionEquationOperatorInt32.cs" />
-    <Compile Include="Operators\DivisionEquationOperatorInt32.cs" />
-    <Compile Include="Operators\MultiplyEquationOperatorInt32.cs" />
-    <Compile Include="Operators\SubstructionEquationOperatorInt32.cs" />
-    <Compile Include="Operators\DivisionEquationOperatorDouble.cs" />
-    <Compile Include="Operators\MultiplyEquationOperatorDouble.cs" />
-    <Compile Include="Operators\SubstructionEquationOperatorDouble.cs" />
+    <Compile Include="Operators\MultiplyEquationOperator.cs" />
+    <Compile Include="Operators\SubtractionEquationOperator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SequenceGenerator.cs" />
   </ItemGroup>
