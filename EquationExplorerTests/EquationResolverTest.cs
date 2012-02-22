@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using EquationExplorer.Equations;
 using EquationExplorer.Operators;
-using EquationExplorerTests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EquationExplorer;
-using Moq;
+using NSubstitute;
 
 namespace EquationExplorerTests
 {
@@ -18,18 +16,18 @@ namespace EquationExplorerTests
         [TestMethod]
         public void EquationResolverAcceptsAvailableOperators()
         {
-            var op1Mock = new Mock<EquationOperator<int>>();
-            var op2Mock = new Mock<EquationOperator<int>>();
+            var op1 = Substitute.For<EquationOperator<int>>();
+            var op2 = Substitute.For<EquationOperator<int>>();
 
             var sut = new EquationResolver<int>();
 
-            sut.AddOperator(op1Mock.Object);
-            sut.AddOperator(op2Mock.Object);
+            sut.AddOperator(op1);
+            sut.AddOperator(op2);
 
             Assert.IsNotNull(sut.Operators);
             Assert.AreEqual(2, sut.Operators.Count);
-            Assert.AreEqual(op1Mock.Object, sut.Operators[0]);
-            Assert.AreEqual(op2Mock.Object, sut.Operators[1]);
+            Assert.AreEqual(op1, sut.Operators[0]);
+            Assert.AreEqual(op2, sut.Operators[1]);
         }
 
         [TestMethod]
@@ -42,29 +40,33 @@ namespace EquationExplorerTests
         [TestMethod]
         public void EquationResolverGeneratesSequencesForEquationMembers()
         {
+            Action<IEnumerable<int>> assertMembers =
+                members => CollectionAssert.AreEquivalent(new[] { 1, 2, 3 }, members.ToArray());
+    
+            var sequenceGenerator = Substitute.For<ISequenceGenerator>();
+            sequenceGenerator.GenerateMembers(Arg.Do(assertMembers), 3);
 
-            var sequenceGeneratorMock = new Mock<ISequenceGenerator>();
-
-            var sut = new EquationResolver<int>
-                          {
-                              SequenceGenerator = sequenceGeneratorMock.Object
-                          };
-
+            var sut = new EquationResolver<int>{ SequenceGenerator = sequenceGenerator };
+            
             sut.Resolve(1, 2, 3);
 
-            sequenceGeneratorMock.Verify(seqGen => seqGen.GenerateMembers(new[] { 1, 2, 3 }, 3), Times.Once());
+            sequenceGenerator.Received().GenerateMembers(Arg.Any<IEnumerable<int>>(), 3);
         }
 
         [TestMethod]
         public void EquationResolverGeneratesSequencesForOperatorsOfValues()
         {
-            var op1 = new Mock<EquationOperator<int>>().Object;
-            var op2 = new Mock<EquationOperator<int>>().Object;
+            var op1 = Substitute.For<EquationOperator<int>>();
+            var op2 = Substitute.For<EquationOperator<int>>();
 
-            var sequenceGeneratorMock = new Mock<ISequenceGenerator>();
+            var sequenceGenerator = Substitute.For<ISequenceGenerator>();
+            Action<IEnumerable<EquationOperator<int>>> assertOperators =
+                opers => CollectionAssert.AreEquivalent(new[] { op1, op2 }, opers.ToArray());
+            sequenceGenerator.GenerateOperators(Arg.Do(assertOperators), 2);
+
             var sut = new EquationResolver<int>
             {
-                SequenceGenerator = sequenceGeneratorMock.Object
+                SequenceGenerator = sequenceGenerator
             };
 
             sut.AddOperator(op1);
@@ -72,62 +74,64 @@ namespace EquationExplorerTests
 
             sut.Resolve(1, 2, 3);
 
-            sequenceGeneratorMock.Verify(seqGen => seqGen.GenerateOperators(new[] { op1, op2 }, 2), Times.Once());
+
+            sequenceGenerator.Received().GenerateOperators(Arg.Any<IEnumerable<EquationOperator<int>>>(), 2);
         }
 
         [TestMethod]
         public void EquationResolverCreatesEquationsForAllCombinations()
         {
-            var memberSeq1 = new Mock<IEnumerable<int>>().Object;
-            var memberSeq2 = new Mock<IEnumerable<int>>().Object;
+            var memberSeq1 = Substitute.For<IEnumerable<int>>();
+            var memberSeq2 = Substitute.For<IEnumerable<int>>();
 
-            var operatorSeq1 = new Mock<IEnumerable<EquationOperator<int>>>().Object;
-            var operatorSeq2 = new Mock<IEnumerable<EquationOperator<int>>>().Object;
+            var operatorSeq1 = Substitute.For<IEnumerable<EquationOperator<int>>>();
+            var operatorSeq2 = Substitute.For<IEnumerable<EquationOperator<int>>>();
 
-            var equationFactoryMock = new Mock<IEquationFactory>();
+            var equationFactory = Substitute.For<IEquationFactory>();
 
-            var sequenceGeneratorMock = new Mock<ISequenceGenerator>();
-            sequenceGeneratorMock.Setup(seqGen => seqGen.GenerateMembers(It.IsAny<IEnumerable<int>>(), It.IsAny<int>())).Returns(new[] { memberSeq1, memberSeq2 });
-            sequenceGeneratorMock.Setup(seqGen => seqGen.GenerateOperators(It.IsAny<IEnumerable<EquationOperator<int>>>(), It.IsAny<int>())).Returns(new[] { operatorSeq1, operatorSeq2 });
+            var sequenceGenerator = Substitute.For<ISequenceGenerator>();
+            sequenceGenerator.GenerateMembers(Arg.Any<IEnumerable<int>>(), 0).ReturnsForAnyArgs(new[] { memberSeq1, memberSeq2 });
+            sequenceGenerator.GenerateOperators(Arg.Any<IEnumerable<EquationOperator<int>>>(), 0).ReturnsForAnyArgs(new[] { operatorSeq1, operatorSeq2 });
 
             var sut = new EquationResolver<int>
                           {
-                              EquationFactory = equationFactoryMock.Object,
-                              SequenceGenerator = sequenceGeneratorMock.Object
+                              EquationFactory = equationFactory,
+                              SequenceGenerator = sequenceGenerator
                           };
 
             sut.Resolve(1, 2);
 
-            equationFactoryMock.Verify(factory => factory.CreateEquation(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<EquationOperator<int>>>()), Times.Exactly(4));
+            equationFactory.ReceivedWithAnyArgs(4).CreateEquation(Arg.Any<IEnumerable<int>>(), Arg.Any<IEnumerable<EquationOperator<int>>>());
         }
 
         [TestMethod]
         public void EquationResolverReturnsFilteredEquations()
         {
-            var eq1Mock = new EquationMock {ToStringReturns = "eq1", ValueToGet = 2};
+            var eq1 = Substitute.For<Equation<int>>();
+            eq1.ToString().Returns("eq1");
+            eq1.Value.Returns(2);
 
-            var eq2Mock = new Mock<Equation<int>>();
-            eq2Mock.SetupGet(eq => eq.Value).Returns(3);
+            var eq2 = Substitute.For<Equation<int>>();
+            eq2.Value.Returns(3);
 
-            var eq3Mock = new EquationMock { ToStringReturns = "eq3", ValueToGet = 2 };
+            var eq3 = Substitute.For<Equation<int>>();
+            eq3.ToString().Returns("eq3");
+            eq3.Value.Returns(2);
 
-            var eq4Mock = new Mock<Equation<int>>();
-            eq4Mock.SetupGet(eq => eq.Value).Returns(3);
+            var eq4 = Substitute.For<Equation<int>>();
+            eq4.Value.Returns(3);
 
-            var expectedEquationsQueue =
-                new Queue<Equation<int>>(new[] {eq1Mock, eq2Mock.Object, eq3Mock, eq4Mock.Object});
+            var equationFactory = Substitute.For<IEquationFactory>();
+            equationFactory.CreateEquation(Arg.Any<IEnumerable<int>>(), Arg.Any<IEnumerable<EquationOperator<int>>>()).Returns(eq1, eq2, eq3, eq4);
 
-            var equationFactoryMock = new Mock<IEquationFactory>();
-            equationFactoryMock.Setup(factory => factory.CreateEquation(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<EquationOperator<int>>>())).Returns(expectedEquationsQueue.Dequeue);
-
-            var sequenceGeneratorMock = new Mock<ISequenceGenerator>();
-            sequenceGeneratorMock.Setup(seqGen => seqGen.GenerateMembers(It.IsAny<IEnumerable<int>>(), It.IsAny<int>())).Returns(new IEnumerable<int>[2]);
-            sequenceGeneratorMock.Setup(seqGen => seqGen.GenerateOperators(It.IsAny<IEnumerable<EquationOperator<int>>>(), It.IsAny<int>())).Returns(new IEnumerable<EquationOperator<int>>[2]);
+            var sequenceGenerator = Substitute.For<ISequenceGenerator>();
+            sequenceGenerator.GenerateMembers(Arg.Any<IEnumerable<int>>(), Arg.Any<int>()).Returns(new IEnumerable<int>[2]);
+            sequenceGenerator.GenerateOperators(Arg.Any<IEnumerable<EquationOperator<int>>>(), Arg.Any<int>()).Returns(new IEnumerable<EquationOperator<int>>[2]);
 
             var sut = new EquationResolver<int>
             {
-                EquationFactory = equationFactoryMock.Object,
-                SequenceGenerator = sequenceGeneratorMock.Object,
+                EquationFactory = equationFactory,
+                SequenceGenerator = sequenceGenerator,
                 Filter = equation => equation.Value.Equals(2)
             };
 
@@ -135,8 +139,8 @@ namespace EquationExplorerTests
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(2, actual.Count());
-            Assert.IsTrue(actual.Contains(eq1Mock));
-            Assert.IsTrue(actual.Contains(eq3Mock));
+            Assert.IsTrue(actual.Contains(eq1));
+            Assert.IsTrue(actual.Contains(eq3));
 
         }
     }

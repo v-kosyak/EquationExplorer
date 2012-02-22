@@ -3,7 +3,6 @@ using EquationExplorer.Equations;
 using EquationExplorer.Operators;
 using EquationExplorerTests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using NSubstitute;
 
 namespace EquationExplorerTests
