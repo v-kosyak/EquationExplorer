@@ -17,5 +17,10 @@ namespace EquationExplorer.Operators
         }
 
         public bool DefaultPriority { get; set; }
+
+        public override string ToString()
+        {
+            return base.ToString();
+        }
     }
 }

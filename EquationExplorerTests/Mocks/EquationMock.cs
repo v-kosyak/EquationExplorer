@@ -1,8 +1,10 @@
-﻿using EquationExplorer.Equations;
+﻿using System;
+using EquationExplorer.Equations;
 
 namespace EquationExplorerTests.Mocks
 {
-    public class EquationMock: Equation<int>
+    [Obsolete]
+    public class EquationMock : Equation<int>
     {
         public string ToStringReturns { get; set; }
         public int ValueToGet { get; set; }

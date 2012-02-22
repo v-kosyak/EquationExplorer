@@ -4,6 +4,7 @@ using EquationExplorer.Operators;
 using EquationExplorerTests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using NSubstitute;
 
 namespace EquationExplorerTests
 {
@@ -15,40 +16,43 @@ namespace EquationExplorerTests
         {
             var left = new SingleEquation<int>(1);
             var right = new SingleEquation<int>(2);
-            var opMock = new Mock<EquationOperator<int>>();
+            var op = Substitute.For<EquationOperator<int>>();
            
-            var sut = new CompositeEquation<int>(left, opMock.Object, right);
+            var sut = new CompositeEquation<int>(left, op, right);
 
             Assert.AreEqual(left, sut.Left);
             Assert.AreEqual(right, sut.Right);
-            Assert.AreEqual(opMock.Object, sut.Operator);
+            Assert.AreEqual(op, sut.Operator);
         }
 
         [TestMethod]
         public void CompositeEquationCanContainCompositeMembers()
         {
-            var opMock = new Mock<EquationOperator<long>>();
+            var op   = Substitute.For<EquationOperator<long>>();
 
-            var left = new CompositeEquation<long>(new SingleEquation<long>(1), opMock.Object,
+            var left = new CompositeEquation<long>(new SingleEquation<long>(1), op,
                                                         new SingleEquation<long>(2));
-            var right = new CompositeEquation<long>(new SingleEquation<long>(1), opMock.Object,
+            var right = new CompositeEquation<long>(new SingleEquation<long>(1), op,
                                                         new SingleEquation<long>(2));
 
-            var sut = new CompositeEquation<long>(left, opMock.Object, right);
+            var sut = new CompositeEquation<long>(left, op, right);
 
             Assert.AreEqual(left, sut.Left);
             Assert.AreEqual(right, sut.Right);
-            Assert.AreEqual(opMock.Object, sut.Operator);
+            Assert.AreEqual(op, sut.Operator);
         }
 
         [TestMethod]
         public void CompositeEquationHasStringPresentation()
         {
-            var left = new EquationMock{ToStringReturns = "l"};
+            var left = Substitute.For<Equation<int>>();
+            left.ToString().Returns("l");
 
-            var right = new EquationMock {ToStringReturns = "r"};
+            var right = Substitute.For<Equation<int>>();
+            right.ToString().Returns("r");
 
-            var op = new EquationOperatorMock {ToStringReturns = "op"};
+            var op = Substitute.For<EquationOperator<int>>();
+            op.ToString().Returns("op");
 
             var sut = new CompositeEquation<int>(left, op, right);
 
@@ -58,16 +62,16 @@ namespace EquationExplorerTests
         [TestMethod]
         public void CompositeEquationEvaluatesWithOperator()
         {
-            var leftMock = new Mock<Equation<int>>();
-            leftMock.SetupGet(left => left.Value).Returns(1);
+            var left = Substitute.For<Equation<int>>();
+            left.Value.Returns(1);
 
-            var rightMock = new Mock<Equation<int>>();
-            rightMock.SetupGet(right => right.Value).Returns(18);
+            var right = Substitute.For<Equation<int>>();
+            right.Value.Returns(18);
 
-            var opMock = new Mock<EquationOperator<int>>();
-            opMock.Setup(op => op.Evaluate(1, 18)).Returns(3);
+            var op = Substitute.For<EquationOperator<int>>();
+            op.Evaluate(1, 18).Returns(3);
 
-            var sut = new CompositeEquation<int>(leftMock.Object, opMock.Object, rightMock.Object);
+            var sut = new CompositeEquation<int>(left, op, right);
 
             var actual = sut.Value;
 

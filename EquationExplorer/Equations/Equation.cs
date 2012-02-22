@@ -15,5 +15,10 @@ namespace EquationExplorer.Equations
         {
             return ToString().GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return base.ToString();
+        }
     }
 }
