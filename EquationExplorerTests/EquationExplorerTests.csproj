@@ -54,9 +54,7 @@
     <Compile Include="CompositeEquationMemberTest.cs" />
     <Compile Include="EquationFactoryTest.cs" />
     <Compile Include="EquationOperatorTests.cs" />
-    <Compile Include="Mocks\EquationMock.cs" />
     <Compile Include="EquationResolverTest.cs" />
-    <Compile Include="Mocks\EquationOperatorMock.cs" />
     <Compile Include="SequenceGeneratorTest.cs" />
     <Compile Include="SingleEquationMemeberTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
